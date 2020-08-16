@@ -1,7 +1,7 @@
 // Markup
 const container = document.querySelector(".xpm");
 const inner = document.querySelector(".xpm-inner");
-const [ levelA, levelB ] = [...container.querySelectorAll(".xpm-level")];
+const [ rankA, rankB ] = [...container.querySelectorAll(".xpm-rank")];
 const xpBar = container.querySelector(".xpm-progress");
 const barA = container.querySelector(".xpm-indicator--bar");
 const bar = container.querySelector(".xpm-progress--bar");
@@ -50,18 +50,18 @@ window.onData = function (data) {
     
     if (data.xpm_init && !initialised) {
 
-        const levels = {};
+        const ranks = {};
 
         for ( let i = 0; i < data.xpm_config.Ranks.length; i++ ) {
-            levels[i+1] = data.xpm_config.Ranks[i];
+            ranks[i+1] = data.xpm_config.Ranks[i];
         }
 
         // Class instance
         instance = new XPM({
             xp: data.xp,
-            levels: levels,
+            ranks: ranks,
 
-            // set initial XP / level
+            // set initial XP / rank
             onInit: function (progress) {
 
                 segments = data.xpm_config.BarSegments
@@ -80,16 +80,20 @@ window.onData = function (data) {
                     container.classList.remove("active");
                 }, data.xpm_config.Timeout);                
 
-                // fill to starting XP / level
+                // fill to starting XP / rank
                 fillSegments(progress, "lastElementChild");
 
-                // Update level indicators
-                levelA.firstElementChild.textContent = this.currentRank;
-                levelB.firstElementChild.textContent = this.nextRank;
+                // Update rank indicators
+                rankA.firstElementChild.textContent = this.currentRank;
+                rankB.firstElementChild.textContent = this.nextRank;
 		
                 // Update XP counter
                 counter.children[0].textContent = this.currentXP;
-                counter.children[1].textContent = this.config.levels[this.nextRank];
+                counter.children[1].textContent = this.config.ranks[this.nextRank];
+
+                // add new ranks
+                rankA.classList.add(`xp-rank-${this.currentRank}`);
+                rankB.classList.add(`xp-rank-${this.nextRank}`);                   
 
                 initialised = true;
             },
@@ -115,30 +119,38 @@ window.onData = function (data) {
                 counter.children[0].textContent = xp;
             },
 
-            // Update on level change
-            onRankChange: function (current, next, previous, add, max, levelUp) {
+            // Update on rank change
+            onRankChange: function (current, next, previous, add, max, rankUp) {
 
-                counter.children[1].textContent = this.config.levels[next];
+                // Remove old ranks
+                rankA.classList.remove(`xp-rank-${previous}`);
+                rankB.classList.remove(`xp-rank-${current}`);
+        
+                // add new ranks
+                rankA.classList.add(`xp-rank-${current}`);
+                rankB.classList.add(`xp-rank-${next}`);                     
+
+                counter.children[1].textContent = this.config.ranks[next];
 		
-                levelB.classList.add("pulse");
+                rankB.classList.add("pulse");
 		
                 fillSegments(0, "firstElementChild");
 		
                 setTimeout(() => {
-                    levelB.classList.remove("pulse");
-                    levelA.classList.add("spin");
-                    levelA.classList.add("highlight");
-                    levelB.classList.add("spin");
-                    levelB.classList.add("highlight");
+                    rankB.classList.remove("pulse");
+                    rankA.classList.add("spin");
+                    rankA.classList.add("highlight");
+                    rankB.classList.add("spin");
+                    rankB.classList.add("highlight");
 			
-                    levelA.firstElementChild.textContent = current;
-                    levelB.firstElementChild.textContent = next;		
+                    rankA.firstElementChild.textContent = current;
+                    rankB.firstElementChild.textContent = next;		
 			
                     setTimeout(() => {
-                        levelA.classList.remove("spin");
-                        levelA.classList.remove("highlight");
-                        levelB.classList.remove("spin");
-                        levelB.classList.remove("highlight");
+                        rankA.classList.remove("spin");
+                        rankA.classList.remove("highlight");
+                        rankB.classList.remove("spin");
+                        rankB.classList.remove("highlight");
                     }, 500);			
                 }, 500);			
             },

@@ -83,7 +83,7 @@ body {
     background-color: #df3232;
 }
 
-.xpm .xpm-inner .xpm-level {
+.xpm .xpm-inner .xpm-rank {
     width: 47px;
     height: 47px;
     border-radius: 50%;
@@ -98,13 +98,13 @@ body {
     position: relative;
 }
 
-.xpm .xpm-inner .xpm-level div {
+.xpm .xpm-inner .xpm-rank div {
     position: absolute;
     font-size: 50px;
     z-index: 10;
 }
 
-.xpm .xpm-inner .xpm-level svg {
+.xpm .xpm-inner .xpm-rank svg {
     position: absolute;
     top: 1px;
     left: 0;
@@ -112,38 +112,38 @@ body {
     height: 100%;
 }
 
-.xpm .xpm-inner .xpm-level path {
+.xpm .xpm-inner .xpm-rank path {
     fill: #2e6eb8;
 }
 
-.xpm .xpm-inner .xpm-level.spin div {
+.xpm .xpm-inner .xpm-rank.spin div {
     -webkit-animation: spin 500ms linear 0ms forwards;
     animation: spin 500ms linear 0ms forwards;
 }
 
-.xpm .xpm-inner .xpm-level.pulse {
+.xpm .xpm-inner .xpm-rank.pulse {
     background-color: transparent;
     -webkit-animation: pulse 500ms linear 0ms forwards;
     animation: pulse 500ms linear 0ms forwards;
 }
 
-.xpm .xpm-inner .xpm-level.pulse div {
+.xpm .xpm-inner .xpm-rank.pulse div {
     color: #2e6eb8;
 }
 
-.xpm .xpm-inner .xpm-level.pulse path {
+.xpm .xpm-inner .xpm-rank.pulse path {
     fill: #fff;
 }
 
-.xpm .xpm-inner .xpm-level.highlight {
+.xpm .xpm-inner .xpm-rank.highlight {
     background-color: transparent;
 }
 
-.xpm .xpm-inner .xpm-level.highlight div {
+.xpm .xpm-inner .xpm-rank.highlight div {
     color: #2e6eb8;
 }
 
-.xpm .xpm-inner .xpm-level.highlight path {
+.xpm .xpm-inner .xpm-rank.highlight path {
     fill: #fff;
 }
 
