@@ -1,5 +1,5 @@
 # XpM
-Adds an XP ranking system like the one found in GTA:O
+Adds an XP ranking system like the one found in GTA:O. Work in progress.
 
 This is a framework agnostic version of my [esx_xp](https://github.com/Mobius1/esx_xp) package.
 
