@@ -1,4 +1,5 @@
 CurrentXP = 0
+CurrentRank = 0
 
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
@@ -9,31 +10,36 @@ AddEventHandler("XpM:ready", function()
 
 
     if identifier then
-        MySQL.Async.fetchAll('SELECT rp_xp FROM users WHERE identifier = @identifier', {
+        MySQL.Async.fetchAll('SELECT rp_xp, rp_rank FROM users WHERE identifier = @identifier', {
             ['@identifier'] = identifier
         }, function(result)
             if #result > 0 then
                 CurrentXP = tonumber(result[1]["rp_xp"])
+                CurrentRank = tonumber(result[1]["rp_rank"])
                 
-                TriggerClientEvent("XpM:init", _source, CurrentXP)
+                TriggerClientEvent("XpM:init", _source, CurrentXP, CurrentRank)
             end
         end)
     end
 end)
 
 RegisterNetEvent("XpM:setXP")
-AddEventHandler("XpM:setXP", function(_xp)
+AddEventHandler("XpM:setXP", function(_xp, _rank)
     local _source = source
     local identifier = GetSteamIdentifier(_source)
 
+    _xp = tonumber(_xp)
+    _rank = tonumber(_rank)
 
     if identifier then
-        MySQL.Async.execute('UPDATE users SET rp_xp = @xp WHERE identifier = @identifier', {
+        MySQL.Async.execute('UPDATE users SET rp_xp = @xp, rp_rank = @rank  WHERE identifier = @identifier', {
             ['@identifier'] = identifier,
-            ['@xp'] = _xp
+            ['@xp'] = _xp,
+            ['@rank'] = _rank
         }, function(result)
-            CurrentXP = tonumber(_xp)
-            TriggerClientEvent("XpM:update", _source, CurrentXP)
+            CurrentXP = _xp
+            CurrentRank = _rank
+            TriggerClientEvent("XpM:update", _source, CurrentXP, CurrentRank)
         end)
     end
 end)
@@ -66,9 +72,7 @@ end)
 
 AddEventHandler("XpM:addXP", function(XPAdd)
     if IsInt(XPAdd) then
-        local Max = tonumber(Config.Ranks[#Config.Ranks])
         local NewXP = CurrentXP + XPAdd
-
         UpdatePlayer(LimitXP(NewXP))
     end
 end)
@@ -76,7 +80,6 @@ end)
 AddEventHandler("XpM:removeXP", function(XPRemove)
     if IsInt(XPRemove) then
         local NewXP = CurrentXP - XPRemove
-
         UpdatePlayer(LimitXP(NewXP))
     end
 end)

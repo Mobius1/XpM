@@ -1,42 +1,45 @@
 
 Player = nil
-XP = 0
+CurrentXP = 0
+CurrentRank = 0
 
 TriggerServerEvent("XpM:ready")
 
 RegisterNetEvent("XpM:init")
-AddEventHandler("XpM:init", function(_xp)
+AddEventHandler("XpM:init", function(_xp, _rank)
 
     local Ranks = CheckRanks()
 
     -- All ranks are valid
     if #Ranks == 0 then
-        XP = tonumber(_xp)
+        CurrentXP = tonumber(_xp)
         SendNUIMessage({
             xpm_init = true,
-            xp = XP,
+            xp = CurrentXP,
             xpm_config = Config
         });
 
-        StatSetInt("MPPLY_GLOBALXP", XP, 1)
+        CurrentRank = _rank
+
+        StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
     else
         print(trans('err_lvls_check', #Ranks, 'Config.Ranks'))
     end
 end)
 
 RegisterNetEvent("XpM:update")
-AddEventHandler("XpM:update", function(_xp)
+AddEventHandler("XpM:update", function(_xp, currentRank)
 
-    local currentRank = XPM_GetRank()
     local endRank = XPM_GetRank(points)
             
-    XP = tonumber(_xp)
+    CurrentXP = tonumber(_xp)
+    CurrentRank = tonumber(currentRank)
     SendNUIMessage({
         xpm_set = true,
-        xp = XP
+        xp = CurrentXP
     })
 
-    StatSetInt("MPPLY_GLOBALXP", XP, 1)
+    StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
 
     -- PlaySoundFrontend(-1, "MP_RANK_UP", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0)
 
@@ -66,7 +69,7 @@ end)
 function UpdateXP(_xp, init)
     _xp = tonumber(_xp)
 
-    local points = XP + _xp;
+    local points = CurrentXP + _xp;
     local max = XPM_GetMaxXP()
 
     if init then
@@ -75,7 +78,9 @@ function UpdateXP(_xp, init)
 
     points = LimitXP(points)
 
-    TriggerServerEvent("XpM:setXP", points)
+    local rank = XPM_GetRank(points)
+
+    TriggerServerEvent("XpM:setXP", points, rank)
 end
 
 
@@ -109,7 +114,7 @@ function XPM_SetRank(Rank)
         return
     end
 
-    local XPAdd = tonumber(Config.Ranks[GoalRank]) - XP
+    local XPAdd = tonumber(Config.Ranks[GoalRank]) - CurrentXP
 
     XPM_Add(XPAdd)
 end
@@ -151,15 +156,15 @@ end
 -- @param	int 	_xp	
 -- @return	void
 function XPM_GetRank(_xp)
-    local len = #Config.Ranks
-    local points = XP
-    if _xp then
-        points = _xp
+
+    if _xp == nil then
+        return CurrentRank
     end
 
+    local len = #Config.Ranks
     for rank = 1, len do
         if rank < len then
-            if Config.Ranks[rank + 1] >= tonumber(points) then
+            if Config.Ranks[rank + 1] >= tonumber(_xp) then
                 return rank
             end
         else
@@ -176,7 +181,7 @@ end
 function XPM_GetXPToNextRank()
     local currentRank = XPM_GetRank()
 
-    return Config.Ranks[currentRank + 1] - tonumber(XP)   
+    return Config.Ranks[currentRank + 1] - tonumber(CurrentXP)   
 end
 
 ------------
@@ -195,7 +200,7 @@ function XPM_GetXPToRank(Rank)
 
     local goalXP = tonumber(Config.Ranks[GoalRankl])
 
-    return goalXP - XP
+    return goalXP - CurrentXP
 end
 
 ------------
@@ -204,7 +209,7 @@ end
 -- @global
 -- @return	int
 function XPM_GetXP()
-    return tonumber(XP)
+    return tonumber(CurrentXP)
 end
 
 ------------
@@ -248,11 +253,11 @@ end)
 
 RegisterNetEvent("XpM:updateUI")
 AddEventHandler("XpM:updateUI", function(_xp)
-    XP = tonumber(_xp)
+    CurrentXP = tonumber(_xp)
 
     SendNUIMessage({
         xpm_set = true,
-        xp = XP
+        xp = CurrentXP
     });
 end)
 
@@ -306,7 +311,7 @@ RegisterCommand('XPM', function(source, args)
         TriggerEvent('chat:addMessage', {
             color = { 255, 0, 0},
             multiline = true,
-            args = {"SYSTEM", trans('cmd_current_xp', XP)}
+            args = {"SYSTEM", trans('cmd_current_xp', CurrentXP)}
         })
         TriggerEvent('chat:addMessage', {
             color = { 255, 0, 0},
@@ -324,10 +329,10 @@ end)
 -- !!!!!! THESE ARE FOR TESTING PURPOSES AND WILL NOT SAVE THE CHANGES IN THE DB !!!!!! --
 RegisterCommand('XPM_SetInitial', function(source, args)
     if IsInt(args[1]) then
-        XP = LimitXP(tonumber(args[1]))
+        CurrentXP = LimitXP(tonumber(args[1]))
         SendNUIMessage({
             xpm_set = true,
-            xp = XP
+            xp = CurrentXP
         });   
     else
         print("XpM: Invalid XP") 
@@ -336,11 +341,12 @@ end)
 
 RegisterCommand('XPM_Add', function(source, args)
     if IsInt(args[1]) then
-        XP = LimitXP(XP + tonumber(args[1]))
-        SendNUIMessage({
-            xpm_set = true,
-            xp = XP
-        }); 
+        XPM_Add(LimitXP(tonumber(args[1])))
+        -- CurrentXP = LimitXP(CurrentXP + tonumber(args[1]))
+        -- SendNUIMessage({
+        --     xpm_set = true,
+        --     xp = CurrentXP
+        -- }); 
     else
         print("XpM: Invalid XP") 
     end  
@@ -348,11 +354,12 @@ end)
 
 RegisterCommand('XPM_Remove', function(source, args)
     if IsInt(args[1]) then    
-        XP = LimitXP(XP - tonumber(args[1]))
-        SendNUIMessage({
-            xpm_set = true,
-            xp = XP
-        }); 
+        XPM_Remove(LimitXP(tonumber(args[1])))
+        -- CurrentXP = LimitXP(CurrentXP - tonumber(args[1]))
+        -- SendNUIMessage({
+        --     xpm_set = true,
+        --     xp = CurrentXP
+        -- }); 
     else
         print("XpM: Invalid XP") 
     end     
