@@ -28,30 +28,25 @@ AddEventHandler("XpM:init", function(_xp, _rank)
 end)
 
 RegisterNetEvent("XpM:update")
-AddEventHandler("XpM:update", function(_xp, currentRank)
+AddEventHandler("XpM:update", function(_xp, _rank)
 
-    local endRank = XPM_GetRank(points)
-            
-    CurrentXP = tonumber(_xp)
-    CurrentRank = tonumber(currentRank)
+    local oldRank = CurrentRank
+    local newRank = _rank
+    local newXP = _xp
+
     SendNUIMessage({
         xpm_set = true,
-        xp = CurrentXP
+        xp = newXP
     })
 
-    StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
-
-    -- PlaySoundFrontend(-1, "MP_RANK_UP", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0)
-
-    if endRank > currentRank then
-        for i = currentRank, endRank - 1 do
-            TriggerEvent("XpM:rankUp", endRank, currentRank)
-        end
-    elseif endRank < currentRank then
-        for i = endRank, currentRank - 1 do
-            TriggerEvent("XpM:rankDown", endRank, currentRank)
-        end                
+    if newRank > oldRank then
+        TriggerEvent("XpM:rankUp", newRank, oldRank)
+    elseif newRank < oldRank then
+        TriggerEvent("XpM:rankDown", newRank, oldRank)            
     end
+
+    CurrentXP = newXP
+    CurrentRank = newRank
 end)
 
 
@@ -302,7 +297,6 @@ TriggerEvent('chat:addSuggestion', '/XPM', 'Display your XP stats')
 
 RegisterCommand('XPM', function(source, args)
     Citizen.CreateThread(function()
-        local currentRank = XPM_GetRank()
         local xpToNext = XPM_GetXPToNextRank()
 
         -- SHOW THE XP BAR
@@ -316,12 +310,12 @@ RegisterCommand('XPM', function(source, args)
         TriggerEvent('chat:addMessage', {
             color = { 255, 0, 0},
             multiline = true,
-            args = {"SYSTEM", trans('cmd_current_lvl', currentRank)}
+            args = {"SYSTEM", trans('cmd_current_lvl', CurrentRank)}
         })
         TriggerEvent('chat:addMessage', {
             color = { 255, 0, 0},
             multiline = true,
-            args = {"SYSTEM", trans('cmd_next_lvl', xpToNext, currentRank + 1)}
+            args = {"SYSTEM", trans('cmd_next_lvl', xpToNext, CurrentRank + 1)}
         })                
     end)
 end)
@@ -341,12 +335,11 @@ end)
 
 RegisterCommand('XPM_Add', function(source, args)
     if IsInt(args[1]) then
-        XPM_Add(LimitXP(tonumber(args[1])))
-        -- CurrentXP = LimitXP(CurrentXP + tonumber(args[1]))
-        -- SendNUIMessage({
-        --     xpm_set = true,
-        --     xp = CurrentXP
-        -- }); 
+        CurrentXP = LimitXP(CurrentXP + tonumber(args[1]))
+        SendNUIMessage({
+            xpm_set = true,
+            xp = CurrentXP
+        }); 
     else
         print("XpM: Invalid XP") 
     end  
@@ -354,12 +347,11 @@ end)
 
 RegisterCommand('XPM_Remove', function(source, args)
     if IsInt(args[1]) then    
-        XPM_Remove(LimitXP(tonumber(args[1])))
-        -- CurrentXP = LimitXP(CurrentXP - tonumber(args[1]))
-        -- SendNUIMessage({
-        --     xpm_set = true,
-        --     xp = CurrentXP
-        -- }); 
+        CurrentXP = LimitXP(CurrentXP - tonumber(args[1]))
+        SendNUIMessage({
+            xpm_set = true,
+            xp = CurrentXP
+        }); 
     else
         print("XpM: Invalid XP") 
     end     

@@ -23,6 +23,24 @@ AddEventHandler("XpM:ready", function()
     end
 end)
 
+function XPM_GetRank(_xp)
+
+    if _xp == nil then
+        return CurrentRank
+    end
+
+    local len = #Config.Ranks
+    for rank = 1, len do
+        if rank < len then
+            if Config.Ranks[rank + 1] >= tonumber(_xp) then
+                return rank
+            end
+        else
+            return rank
+        end
+    end
+end	
+
 RegisterNetEvent("XpM:setXP")
 AddEventHandler("XpM:setXP", function(_xp, _rank)
     local _source = source
@@ -48,14 +66,17 @@ function UpdatePlayer(source, xp)
     local _source = source
     local identifier = GetSteamIdentifier(_source)
 
-    if identifier then
-        MySQL.Async.execute('UPDATE users SET rp_xp = @xp WHERE identifier = @identifier', {
-            ['@identifier'] = identifier,
-            ['@xp'] = xp
-        }, function(result)
-            CurrentXP = tonumber(xp)
+    CurrentXP = tonumber(xp)
+    CurrentRank = XPM_GetRank(CurrentXP)
 
-            TriggerClientEvent("XpM:updateUI", _source, CurrentXP)
+    if identifier then
+        MySQL.Async.execute('UPDATE users SET rp_xp = @xp, rp_rank = @rank WHERE identifier = @identifier', {
+            ['@identifier'] = identifier,
+            ['@xp'] = CurrentXP,
+            ['@rank'] = CurrentRank
+        }, function(result)
+
+            TriggerClientEvent("XpM:update", _source, CurrentXP, CurrentRank)
         end)
     end
 end
