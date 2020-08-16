@@ -172,7 +172,7 @@ You can find a demo of customised UI [here](https://codepen.io/Mobius1/full/eYJR
 
 To lock something to a rank you can listen for the `XpM:rankUp` or `XpM:rankDown` events:
 
-##### Example: Unlock something when player reaches rank 10:
+Example of unlocking something when player reaches rank 10:
 ```lua
 AddEventHandler("XpM:rankUp", function(newRank, previousRank)
     if newRank == 10 then
