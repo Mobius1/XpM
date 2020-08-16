@@ -44,7 +44,7 @@ AddEventHandler("XpM:setXP", function(_xp, _rank)
     end
 end)
 
-function UpdatePlayer(xp)
+function UpdatePlayer(source, xp)
     local _source = source
     local identifier = GetSteamIdentifier(_source)
 
@@ -64,22 +64,22 @@ end
 --                        EVENTS                          --
 ------------------------------------------------------------
 
-AddEventHandler("XpM:setInitial", function(XPInit)
+AddEventHandler("XpM:setInitial", function(PlayerID, XPInit)
     if IsInt(XPInit) then
-        UpdatePlayer(LimitXP(XPInit))
+        UpdatePlayer(PlayerID, LimitXP(XPInit))
     end
 end)
 
-AddEventHandler("XpM:addXP", function(XPAdd)
+AddEventHandler("XpM:addXP", function(PlayerID, XPAdd)
     if IsInt(XPAdd) then
         local NewXP = CurrentXP + XPAdd
-        UpdatePlayer(LimitXP(NewXP))
+        UpdatePlayer(PlayerID, LimitXP(NewXP))
     end
 end)
 
-AddEventHandler("XpM:removeXP", function(XPRemove)
+AddEventHandler("XpM:removeXP", function(PlayerID, XPRemove)
     if IsInt(XPRemove) then
         local NewXP = CurrentXP - XPRemove
-        UpdatePlayer(LimitXP(NewXP))
+        UpdatePlayer(PlayerID, LimitXP(NewXP))
     end
 end)
