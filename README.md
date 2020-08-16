@@ -34,7 +34,7 @@ You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO)
 * Import the `XpM.sql` file into your db
 * Add `start XpM` in your `server.cfg`
 * Edit `config.lua` to your liking
-* Start your server and rejoice!
+* Start your server
 
 ## Configuration
 
@@ -118,11 +118,15 @@ Listen for rank change events. These can be used to reward / punish the player f
 
 Listen for rank-up event
 ```lua
-AddEventHandler("XpM:rankUp", newRank --[[ integer ]], previousRank --[[ integer ]])
+AddEventHandler("XpM:rankUp", function(newRank --[[ integer ]], previousRank --[[ integer ]])
+    -- Do something when player ranks up
+end)
 ```
 Listen for rank-down event
 ```lua
-AddEventHandler("XpM:rankDown", newRank --[[ integer ]], previousRank --[[ integer ]])
+AddEventHandler("XpM:rankDown", function(newRank --[[ integer ]], previousRank --[[ integer ]])
+    -- Do something when player drops a rank
+end)
 ```
 
 ## Server Triggers
@@ -131,17 +135,17 @@ Each of these triggers will save the player's XP as well as update their UI in r
 
 Set player's initial XP
 ```lua
-TriggerEvent("XpM:setInitial", source --[[ integer ]], XP --[[ integer ]])
+TriggerEvent("XpM:setInitial", PlayerID --[[ integer ]], XP --[[ integer ]])
 ```
 
 Give XP to player
 ```lua
-TriggerEvent("XpM:addXP", source --[[ integer ]], XP --[[ integer ]])
+TriggerEvent("XpM:addXP", PlayerID --[[ integer ]], XP --[[ integer ]])
 ```
 
 Remove XP from player
 ```lua
-TriggerEvent("XpM:removeXP", source --[[ integer ]], XP --[[ integer ]])
+TriggerEvent("XpM:removeXP", PlayerID --[[ integer ]], XP --[[ integer ]])
 ```
 
 ## Commands
@@ -156,8 +160,26 @@ Your current rank is xxxx
 You require xxxx XP to advance to rank yyyy
 ```
 
-## To Do
-* Allow globe / rank colour change based on rank
+## FAQ
+
+#### How do I change the look of the bar?
+
+With a little knowledge of HTML5,  CSS3 and JS you can change all aspects of the look and layout of the bar to make it fit with your UI. The main structure is defined in `html/ui.html`, the main style is defined in `html/css/app.css` and scripting is defined in `html/js/app.js`.
+
+You can find a demo of customised UI [here](https://codepen.io/Mobius1/full/eYJRmVy)
+
+#### How do I lock a weapon / vehicle / unlockable to a rank?
+
+To lock something to a rank you can listen for the `XpM:rankUp` or `XpM:rankDown` events:
+
+##### Example: Unlock something when player reaches rank 10:
+```lua
+AddEventHandler("XpM:rankUp", function(newRank, previousRank)
+    if newRank == 10 then
+        -- unlock something at rank 10
+    end
+end)
+```
 
 ## Contributing
 Pull requests welcome.
