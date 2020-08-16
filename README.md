@@ -31,6 +31,7 @@ You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO)
 * Download and extract the package: https://github.com/Mobius1/XpM/archive/master.zip
 * Rename the `XpM-master` directory to `XpM`
 * Drop the `XpM` directory into your `resources` directory on your server
+* Import the `XpM.sql` file into your db
 * Add `start XpM` in your `server.cfg`
 * Edit `config.lua` to your liking
 * Start your server and rejoice!
