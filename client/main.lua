@@ -268,6 +268,9 @@ AddEventHandler('XpM:Add', XPM_Add)
 RegisterNetEvent("XpM:Remove")
 AddEventHandler('XpM:Remove', XPM_Remove)
 
+RegisterNetEvent("XpM:SetRank")
+AddEventHandler('XpM:SetRank', XPM_SetRank)
+
 
 ------------------------------------------------------------
 --                        EXPORTS                         --
@@ -281,6 +284,9 @@ exports('XPM_Add', XPM_Add)
 
 -- REMOVE XP
 exports('XPM_Remove', XPM_Remove)
+
+-- SET RANK
+exports('XPM_SetRank', XPM_SetRank)
 
 -- GET CURRENT XP
 exports('XPM_GetXP', XPM_GetXP)

@@ -140,6 +140,9 @@ TriggerClientEvent('XpM:Add', source, xp)
 -- REMOVE XP
 TriggerClientEvent('XpM:Remove', source, xp)
 
+-- SET RANK
+TriggerClientEvent('XpM:SetRank', source, rank)
+
 ```
 
 ## Commands

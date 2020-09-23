@@ -23,12 +23,7 @@ AddEventHandler("XpM:ready", function()
     end
 end)
 
-function XPM_GetRank(_xp)
-
-    if _xp == nil then
-        return CurrentRank
-    end
-
+function GetRank(_xp)
     local len = #Config.Ranks
     for rank = 1, len do
         if rank < len then
@@ -67,7 +62,7 @@ function UpdatePlayer(source, xp)
     local identifier = GetSteamIdentifier(_source)
 
     CurrentXP = tonumber(xp)
-    CurrentRank = XPM_GetRank(CurrentXP)
+    CurrentRank = GetRank(CurrentXP)
 
     if identifier then
         MySQL.Async.execute('UPDATE users SET rp_xp = @xp, rp_rank = @rank WHERE identifier = @identifier', {

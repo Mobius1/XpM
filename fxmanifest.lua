@@ -38,6 +38,8 @@ files {
 export 'XPM_SetInitial'
 export 'XPM_Add'
 export 'XPM_Remove'
+export 'XPM_SetRank'
+
 export 'XPM_GetXP'
 export 'XPM_GetRank'
 export 'XPM_GetXPToNextRank'
