@@ -130,22 +130,16 @@ end)
 ```
 
 ## Server Triggers
-
-Each of these triggers will save the player's XP as well as update their UI in real-time
-
-Set player's initial XP
 ```lua
-TriggerEvent("XpM:setInitial", PlayerID --[[ integer ]], XP --[[ integer ]])
-```
+-- SET INTITIAL XP
+TriggerClientEvent('XpM:SetInitial', source, xp)
 
-Give XP to player
-```lua
-TriggerEvent("XpM:addXP", PlayerID --[[ integer ]], XP --[[ integer ]])
-```
+-- ADD XP
+TriggerClientEvent('XpM:Add', source, xp)
 
-Remove XP from player
-```lua
-TriggerEvent("XpM:removeXP", PlayerID --[[ integer ]], XP --[[ integer ]])
+-- REMOVE XP
+TriggerClientEvent('XpM:Remove', source, xp)
+
 ```
 
 ## Commands

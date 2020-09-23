@@ -268,30 +268,6 @@ AddEventHandler('XpM:Add', XPM_Add)
 RegisterNetEvent("XpM:Remove")
 AddEventHandler('XpM:Remove', XPM_Remove)
 
--- GET CURRENT XP
-RegisterNetEvent("XpM:GetXP")
-AddEventHandler('XpM:GetXP', XPM_GetXP)
-
--- GET CURRENT RANK
-RegisterNetEvent("XpM:GetRank")
-AddEventHandler('XpM:GetRank', XPM_GetRank)
-
--- GET XP REQUIRED TO RANK-UP
-RegisterNetEvent("XpM:GetXPToNextRank")
-AddEventHandler('XpM:GetXPToNextRank', XPM_GetXPToNextRank)
-
--- GET XP REQUIRED TO RANK-UP
-RegisterNetEvent("XpM:GetXPToRank")
-AddEventHandler('XpM:GetXPToRank', XPM_GetXPToRank)
-
--- GET MAX XP
-RegisterNetEvent("XpM:GetMaxXP")
-AddEventHandler('XpM:GetMaxXP', XPM_GetMaxXP)
-
--- GET MAX RANK
-RegisterNetEvent("XpM:GetMaxRank")
-AddEventHandler('XpM:GetMaxRank', XPM_GetMaxRank)
-
 
 ------------------------------------------------------------
 --                        EXPORTS                         --
