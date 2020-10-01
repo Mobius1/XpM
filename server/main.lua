@@ -1,13 +1,10 @@
 CurrentXP = 0
 CurrentRank = 0
 
-TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-
 RegisterNetEvent("XpM:ready")
 AddEventHandler("XpM:ready", function()
     local _source = source
     local identifier = GetSteamIdentifier(_source)
-
 
     if identifier then
         MySQL.Async.fetchAll('SELECT rp_xp, rp_rank FROM users WHERE identifier = @identifier', {
@@ -15,7 +12,7 @@ AddEventHandler("XpM:ready", function()
         }, function(result)
             if #result > 0 then
                 CurrentXP = tonumber(result[1]["rp_xp"])
-                CurrentRank = tonumber(result[1]["rp_rank"])
+                CurrentRank = tonumber(result[1]["rp_rank"])              
                 
                 TriggerClientEvent("XpM:init", _source, CurrentXP, CurrentRank)
             end

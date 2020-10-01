@@ -1,5 +1,4 @@
 
-Player = nil
 CurrentXP = 0
 CurrentRank = 0
 
@@ -38,12 +37,6 @@ AddEventHandler("XpM:update", function(_xp, _rank)
         xpm_set = true,
         xp = newXP
     })
-
-    if newRank > oldRank then
-        TriggerEvent("XpM:rankUp", newRank, oldRank)
-    elseif newRank < oldRank then
-        TriggerEvent("XpM:rankDown", newRank, oldRank)            
-    end
 
     CurrentXP = newXP
     CurrentRank = newRank
@@ -270,6 +263,15 @@ AddEventHandler('XpM:Remove', XPM_Remove)
 
 RegisterNetEvent("XpM:SetRank")
 AddEventHandler('XpM:SetRank', XPM_SetRank)
+
+-- RANK CHANGE NUI CALLBACK
+RegisterNUICallback('xpm_rankchange', function(data)
+    if data.rankUp then
+        TriggerEvent("XpM:rankUp", data.current, data.previous)
+    else
+        TriggerEvent("XpM:rankDown", data.current, data.previous)
+    end
+end)
 
 
 ------------------------------------------------------------

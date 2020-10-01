@@ -6,7 +6,7 @@ description 'XP Ranking System (non-ESX version)'
 
 author 'Karl Saunders'
 
-version '1.2.0'
+version '1.2.1'
 
 server_scripts {
     '@mysql-async/lib/MySQL.lua',

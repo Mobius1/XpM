@@ -45,6 +45,14 @@ function fillSegments(pr, child) {
     }
 }
 
+function PostData(type, rankUp, current, previous) {
+    fetch(`https://${GetParentResourceName()}/${type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+        body: JSON.stringify({ rankUp, current, previous })
+    });
+}
+
 
 window.onData = function (data) {
     
@@ -121,6 +129,9 @@ window.onData = function (data) {
 
             // Update on rank change
             onRankChange: function (current, next, previous, add, max, rankUp) {
+
+                // Fire rank change to update client UI
+                PostData("xpm_rankchange", rankUp, current, previous)
 
                 // Remove old ranks
                 rankA.classList.remove(`xp-rank-${previous}`);
