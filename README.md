@@ -9,8 +9,27 @@ This is a framework agnostic version of my [esx_xp](https://github.com/Mobius1/e
 * Add / remove XP from your own script / job
 * Allows you listen for rank changes to reward players
 * Fully customisable UI
+* Integrated leaderboard
 
-## Demo
+## TOC
+* [Features](#features)
+* [Demos](#demos)
+* [Requirements](#requirements)
+* [Download & Installation](#download---installation)
+* [Configuration](#configuration)
+* [Functions](#functions)
++ [Setters](#setters)
++ [Getters](#getters)
+* [Client Event Listeners](#client-event-listeners)
+* [Server Triggers](#server-triggers)
+* [UI](#ui)
+* [Commands](#commands)
+* [FAQ](#faq)
+* [Contributing](#contributing)
+* [Legal](#legal)
++ [License](#license)
+
+## Demos
 You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO).
 
 ##### Increasing XP
@@ -21,6 +40,8 @@ You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO)
 
 ![Demo Image 2](https://i.imgur.com/uNPRGo5.gif)
 
+##### Leaderboard
+![Demo Image 3](https://i.imgur.com/87jbNDZ.png)
 
 ## Requirements
 
@@ -32,7 +53,7 @@ You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO)
 * Rename the `XpM-master` directory to `XpM`
 * Drop the `XpM` directory into your `resources` directory on your server
 * Import the `XpM.sql` file into your db
-* Add `start XpM` in your `server.cfg`
+* Add `ensure XpM` in your `server.cfg`
 * Edit `config.lua` to your liking
 * Start your server
 
@@ -41,12 +62,18 @@ You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO)
 The `config.lua` file is set to emulate GTA:O as close as possible, but can be changed to fit your own needs.
 
 ```lua
-Config.Enabled = true       -- enable / disable the resource
-Config.Locale = 'en'        -- Current language
-Config.Width = 532          -- Sets the width of the XP bar in px
-Config.Timeout = 5000       -- Sets the interval in ms that the XP bar is shown after updating
-Config.BarSegments = 10     -- Sets the number of segments the XP bar has. Native GTA:O is 10
-Config.Ranks = {}          -- XP ranks. Must be a table of integers with the first element being 0.
+Config.Enabled      = true  -- enable / disable the resource
+Config.Locale       = 'en'  -- Current language
+Config.Width        = 532   -- Sets the width of the XP bar in px
+Config.Timeout      = 5000  -- Sets the interval in ms that the XP bar is shown before fading out
+Config.BarSegments  = 10    -- Sets the number of segments the XP bar has. Native GTA:O is 10
+Config.Ranks        = {}    -- XP ranks. Must be a table of integers with the first element being 0.
+
+Config.Leaderboard = {
+    Enabled     = true,     -- Enable the leaderboard
+    ShowPing    = true,     -- Show player pings on the leaderboard
+    Order       = "rank"    -- Order the player list by "name", "rank" or "id"
+}
 ```
 
 ## Functions
@@ -145,6 +172,11 @@ TriggerClientEvent('XpM:SetRank', source, rank)
 
 ```
 
+## UI
+The UI can be toggled with the `Z` key by default. The UI will fade out after the interval defined by `Config.Timeout` or you can close it immediately with the `Z` key.
+
+The data in the leaderboard is refreshed whenever it is opened so you get up-to-date information.
+
 ## Commands
 Get current XP stats
 ```lua
@@ -159,7 +191,7 @@ You require xxxx XP to advance to rank yyyy
 
 ## FAQ
 
-#### How do I change the look of the bar?
+#### How do I change the look of the UI?
 
 With a little knowledge of HTML5,  CSS3 and JS you can change all aspects of the look and layout of the bar to make it fit with your UI. The main structure is defined in `html/ui.html`, the main style is defined in `html/css/app.css` and scripting is defined in `html/js/app.js`.
 
