@@ -1,12 +1,14 @@
 
-CurrentXP = 0
-CurrentRank = 0
+local CurrentXP = 0
+local CurrentRank = 0
 local Leaderboard = nil
+local Players = {}
+local UIActive = true
 
 TriggerServerEvent("XpM:ready")
 
 RegisterNetEvent("XpM:init")
-AddEventHandler("XpM:init", function(_xp, _rank, _players)
+AddEventHandler("XpM:init", function(_xp, _rank, players)
 
     local Ranks = CheckRanks()
 
@@ -16,15 +18,21 @@ AddEventHandler("XpM:init", function(_xp, _rank, _players)
         local data = {
             xpm_init = true,
             xpm_config = Config,
-            players = _players,
-            currentID = false
+            currentID = false,
         }
 
-        if Config.Leaderboard.Enabled and _players then
-            for k, v in pairs(_players) do
+        if Config.Leaderboard.Enabled and players then
+            data.players = players
+            data.showPing = Config.Leaderboard.ShowPing
+        
+            for k, v in pairs(players) do
                 if GetPlayerServerId(PlayerId()) == tonumber(v.id) then
                     data.currentID = tonumber(v.id)
                 end
+            end
+
+            for k,v in pairs(players) do
+                Players[v.id] = v
             end
         end
 
@@ -57,6 +65,23 @@ AddEventHandler("XpM:update", function(_xp, _rank)
     CurrentXP = newXP
     CurrentRank = newRank
 end)
+
+if Config.Leaderboard.Enabled then
+    RegisterNetEvent("XpM:setPlayerData")
+    AddEventHandler("XpM:setPlayerData", function(players)
+        for k, v in pairs(players) do
+            Players[v.id] = v
+        end
+
+        print("update")
+
+        -- Update leaderboard
+        SendNUIMessage({
+            xpm_updateleaderboard = true,
+            xpm_players = Players
+        })
+    end)
+end
 
 
 ------------------------------------------------------------
@@ -242,9 +267,16 @@ end
 Citizen.CreateThread(function()
     while true do
         if IsControlJustReleased(0, 20) then
+            UIActive = not UIActive
+
+            if UIActive then
+                TriggerServerEvent("XpM:getPlayerData")
+            end
+
             SendNUIMessage({
                 xpm_display = true
             })
+            
         end
         Citizen.Wait(1)
     end
@@ -287,6 +319,10 @@ RegisterNUICallback('xpm_rankchange', function(data)
     else
         TriggerEvent("XpM:rankDown", data.current, data.previous)
     end
+end)
+
+RegisterNUICallback('xpm_uichange', function(data)
+    UIActive = false
 end)
 
 

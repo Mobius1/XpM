@@ -1,5 +1,12 @@
 class Leaderboard {
-    constructor() {
+    constructor(options) {
+
+        const config = {
+            showPing: false
+        };
+
+        this.config = Object.assign({}, config, options);
+
         this.container = document.getElementById("xpm_leaderboard");
         this.players = {};
 		
@@ -28,8 +35,11 @@ class Leaderboard {
         const li = document.createElement("li");
         li.classList.add("xpm-leaderboard--player");
 		
+        const info = document.createElement("div");
+        info.classList.add("xpm-leaderboard--playerinfo");
+		
         const name = document.createElement("div");
-        name.classList.add("xpm-leaderboard--playername");
+        name.classList.add("xpm-leaderboard--playername");	
 		
         const rank = document.createElement("div");
         rank.classList.add("xpm-leaderboard--playerrank");
@@ -56,7 +66,18 @@ class Leaderboard {
         rank.appendChild(svg);
         rank.appendChild(num);
 		
-        li.appendChild(name);
+        info.appendChild(name);
+
+        if ( this.config.showPing ) {
+            const ping = document.createElement("div");
+            ping.classList.add("xpm-leaderboard--playerping");
+
+            ping.textContent = `${player.ping}ms`;
+
+            info.appendChild(ping);
+        }
+
+        li.appendChild(info);
         li.appendChild(rank);
 		
         this.list.appendChild(li);
@@ -68,7 +89,27 @@ class Leaderboard {
         this.header.textContent = `Players: ${Object.keys(this.players).length}`;
     }
 
-    update() {
+    updatePlayers(players) {
+        for ( const id in players ) {
+            const player = players[id];
+            if ( !(player.id in this.players) ) {
+                this.addPlayer(player);
+            } else {
+                const row = this.players[player.id].row;
+                row.querySelector(".xpm-leaderboard--playername").textContent = player.name;
+                row.querySelector(".xpm-leaderboard--playerranknum").textContent = player.rank;
+
+                if ( this.config.showPing ) {
+                    row.querySelector(".xpm-leaderboard--playerping").textContent = `${player.ping}ms`;
+                }
+
+                this.players[player.id].name = player.name;
+                this.players[player.id].rank = player.rank;
+                this.players[player.id].ping = player.ping;
+            }
+            
+        }
+
         this.header.textContent = `Players: ${Object.keys(this.players).length}`;
     }
 	

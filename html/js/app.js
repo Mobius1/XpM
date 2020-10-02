@@ -6,7 +6,7 @@ const xpBar = container.querySelector(".xpm-progress");
 const barA = container.querySelector(".xpm-indicator--bar");
 const bar = container.querySelector(".xpm-progress--bar");
 const counter = container.querySelector(".xpm-data");
-let timer = false;
+let displayTimer = false;
 let initialised = false;
 
 // Create XP bar segments
@@ -48,7 +48,6 @@ function fillSegments(pr, child) {
 }
 
 function TriggerRankChange(rankUp, current, previous) {
-
     leaderboard.updateRank(currentID, current)
 
     fetch(`https://${GetParentResourceName()}/xpm_rankchange`, {
@@ -56,6 +55,34 @@ function TriggerRankChange(rankUp, current, previous) {
         headers: { 'Content-Type': 'application/json; charset=UTF-8' },
         body: JSON.stringify({ rankUp, current, previous })
     });
+}
+
+function UIOpen() {
+    clearTimeout(displayTimer);
+
+    container.classList.add("active");
+    if ( leaderboard ) {
+        leaderboard.container.classList.add("active");
+    }
+
+    displayTimer = setTimeout(() => {
+        UIClose();
+
+        fetch(`https://${GetParentResourceName()}/xpm_uichange`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+            body: JSON.stringify({})
+        });        
+    }, 5000);
+}
+
+function UIClose() {
+    clearTimeout(displayTimer);
+
+    container.classList.remove("active");
+    if ( leaderboard ) {
+        leaderboard.container.classList.remove("active");
+    }
 }
 
 window.onData = function (data) {
@@ -66,22 +93,28 @@ window.onData = function (data) {
             currentID = data.currentID
         }
 
-        leaderboard = new Leaderboard();
+        if ( data.players ) {
+            leaderboard = new Leaderboard({
+                showPing: data.showPing,
+            });
 
-        leaderboard.render();
+            leaderboard.render();
 
-        leaderboard.addPlayers(data.players);
-        
-        // Fake players for testing
-        leaderboard.addPlayers([{
-            id: 3,
-            name: "Fusiixns",
-            rank:92
-        }, {
-            id: 11,
-            name: "Lyles",
-            rank: 89
-        }]); 
+            leaderboard.addPlayers(data.players);
+            
+            // Fake players for testing
+            leaderboard.addPlayers([{
+                id: 3,
+                name: "Fusiixns",
+                rank:92,
+                ping: 15
+            }, {
+                id: 11,
+                name: "Lyles",
+                rank: 89,
+                ping: 12
+            }]); 
+        }
 
         const ranks = {};
 
@@ -104,15 +137,12 @@ window.onData = function (data) {
 
                 inner.style.width = `${data.xpm_config.Width}px`;
 
-                clearTimeout(timer);
                 // show the xp bar
-                container.classList.add("active");   
-                leaderboard.container.classList.add("active");  
+                UIOpen()
                 
                 // hide the xp bar
-                timer = setTimeout(() => {
-                    container.classList.remove("active");
-                    leaderboard.container.classList.remove("active");   
+                displayTimer = setTimeout(() => {
+                    UIClose();
                 }, data.xpm_config.Timeout);                
 
                 // fill to starting XP / rank
@@ -134,7 +164,7 @@ window.onData = function (data) {
             },
 	
             onStart: function(add) {
-                clearTimeout(timer);
+                clearTimeout(displayTimer);
                 // show the xp bar
                 container.classList.add("active");
 
@@ -195,9 +225,11 @@ window.onData = function (data) {
 	
             onEnd: function (add) {
                 // hide the xp bar
-                timer = setTimeout(() => {
+                displayTimer = setTimeout(() => {
                     container.classList.remove("active");
-                    leaderboard.container.classList.remove("active");   
+                    if ( leaderboard ) {
+                        leaderboard.container.classList.remove("active");
+                    }
                 }, data.xpm_config.Timeout);
 
                 xpBar.classList.remove("xpm-remove");
@@ -222,22 +254,17 @@ window.onData = function (data) {
     
     // Show XP bar
     if (data.xpm_display && initialised) {
-
         if ( container.classList.contains("active") ) {
-            container.classList.remove("active");
-            leaderboard.container.classList.remove("active");
+            UIClose()
         } else {
-            container.classList.add("active");
-            leaderboard.container.classList.add("active");  
-
-            this.clearTimeout(this.xpTimer);
-
-            this.xpTimer = this.setTimeout(() => {
-                container.classList.remove("active");
-                leaderboard.container.classList.remove("active");   
-            }, 5000);
+            UIOpen()
         }
-    }    
+    }   
+    
+    // Update Leaderboard
+    if (data.xpm_updateleaderboard && initialised) {
+        leaderboard.updatePlayers(data.xpm_players);
+    }     
 };
 
 window.onload = function (e) {

@@ -6,7 +6,7 @@ Config.Enabled = true -- enable the resource
 
 Config.Leaderboard = {
     Enabled = true,
-    ShowPing = false  
+    ShowPing = true 
 }
 
 Config.Width = 532
