@@ -41,7 +41,7 @@ You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO)
 ![Demo Image 2](https://i.imgur.com/uNPRGo5.gif)
 
 ##### Leaderboard
-![Demo Image 3](https://i.imgur.com/bcCFTMk.png)
+![Demo Image 3](https://i.imgur.com/vOY7xpI.png)
 
 ## Requirements
 
