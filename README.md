@@ -18,8 +18,8 @@ This is a framework agnostic version of my [esx_xp](https://github.com/Mobius1/e
 * [Download & Installation](#download---installation)
 * [Configuration](#configuration)
 * [Functions](#functions)
-+ [Setters](#setters)
-+ [Getters](#getters)
+* [Setters](#setters)
+* [Getters](#getters)
 * [Client Event Listeners](#client-event-listeners)
 * [Server Triggers](#server-triggers)
 * [UI](#ui)
@@ -27,7 +27,7 @@ This is a framework agnostic version of my [esx_xp](https://github.com/Mobius1/e
 * [FAQ](#faq)
 * [Contributing](#contributing)
 * [Legal](#legal)
-+ [License](#license)
+* [License](#license)
 
 ## Demos
 You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO).
