@@ -32,6 +32,7 @@ files {
     'html/fonts/ChaletComprimeCologneSixty.ttf',
     'html/css/app.css',
     'html/js/class.xpm.js',
+    'html/js/class.leaderboard.js',
     'html/js/app.js'
 }
 

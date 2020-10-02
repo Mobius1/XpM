@@ -1,22 +1,38 @@
 
 CurrentXP = 0
 CurrentRank = 0
+local Leaderboard = nil
 
 TriggerServerEvent("XpM:ready")
 
 RegisterNetEvent("XpM:init")
-AddEventHandler("XpM:init", function(_xp, _rank)
+AddEventHandler("XpM:init", function(_xp, _rank, _players)
 
     local Ranks = CheckRanks()
 
     -- All ranks are valid
     if #Ranks == 0 then
-        CurrentXP = tonumber(_xp)
-        SendNUIMessage({
+
+        local data = {
             xpm_init = true,
-            xp = CurrentXP,
-            xpm_config = Config
-        });
+            xpm_config = Config,
+            players = _players,
+            currentID = false
+        }
+
+        if Config.Leaderboard.Enabled and _players then
+            for k, v in pairs(_players) do
+                if GetPlayerServerId(PlayerId()) == tonumber(v.id) then
+                    data.currentID = tonumber(v.id)
+                end
+            end
+        end
+
+        CurrentXP = tonumber(_xp)
+
+        data.xp = CurrentXP
+
+        SendNUIMessage(data)
 
         CurrentRank = _rank
 
@@ -57,7 +73,7 @@ end)
 function UpdateXP(_xp, init)
     _xp = tonumber(_xp)
 
-    local points = CurrentXP + _xp;
+    local points = CurrentXP + _xp
     local max = XPM_GetMaxXP()
 
     if init then
@@ -246,7 +262,7 @@ AddEventHandler("XpM:updateUI", function(_xp)
     SendNUIMessage({
         xpm_set = true,
         xp = CurrentXP
-    });
+    })
 end)
 
 -- SET INTITIAL XP
@@ -347,7 +363,7 @@ RegisterCommand('XPM_SetInitial', function(source, args)
         SendNUIMessage({
             xpm_set = true,
             xp = CurrentXP
-        });   
+        })   
     else
         print("XpM: Invalid XP") 
     end       
@@ -359,7 +375,7 @@ RegisterCommand('XPM_Add', function(source, args)
         SendNUIMessage({
             xpm_set = true,
             xp = CurrentXP
-        }); 
+        }) 
     else
         print("XpM: Invalid XP") 
     end  
@@ -371,7 +387,7 @@ RegisterCommand('XPM_Remove', function(source, args)
         SendNUIMessage({
             xpm_set = true,
             xp = CurrentXP
-        }); 
+        }) 
     else
         print("XpM: Invalid XP") 
     end     

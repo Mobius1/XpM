@@ -4,6 +4,11 @@ Config.Locale = 'en'
 
 Config.Enabled = true -- enable the resource
 
+Config.Leaderboard = {
+    Enabled = true,
+    ShowPing = false  
+}
+
 Config.Width = 532
 Config.Timeout = 5000 -- interval in ms that the XP bar is shown after updating
 

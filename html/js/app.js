@@ -11,7 +11,9 @@ let initialised = false;
 
 // Create XP bar segments
 let segments = 10;
-let instance = false;
+let rankbar = false;
+let leaderboard = false;
+let currentID = false;
 
 // HELPER FUNCTIONS
 function renderBar() {
@@ -45,18 +47,41 @@ function fillSegments(pr, child) {
     }
 }
 
-function PostData(type, rankUp, current, previous) {
-    fetch(`https://${GetParentResourceName()}/${type}`, {
+function TriggerRankChange(rankUp, current, previous) {
+
+    leaderboard.updateRank(currentID, current)
+
+    fetch(`https://${GetParentResourceName()}/xpm_rankchange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json; charset=UTF-8' },
         body: JSON.stringify({ rankUp, current, previous })
     });
 }
 
-
 window.onData = function (data) {
     
     if (data.xpm_init && !initialised) {
+
+        if ( data.currentID !== false ) {
+            currentID = data.currentID
+        }
+
+        leaderboard = new Leaderboard();
+
+        leaderboard.render();
+
+        leaderboard.addPlayers(data.players);
+        
+        // Fake players for testing
+        leaderboard.addPlayers([{
+            id: 3,
+            name: "Fusiixns",
+            rank:92
+        }, {
+            id: 11,
+            name: "Lyles",
+            rank: 89
+        }]); 
 
         const ranks = {};
 
@@ -64,8 +89,8 @@ window.onData = function (data) {
             ranks[i+1] = data.xpm_config.Ranks[i];
         }
 
-        // Class instance
-        instance = new XPM({
+        // Class rankbar
+        rankbar = new XPM({
             xp: data.xp,
             ranks: ranks,
 
@@ -81,11 +106,13 @@ window.onData = function (data) {
 
                 clearTimeout(timer);
                 // show the xp bar
-                container.classList.add("active");     
+                container.classList.add("active");   
+                leaderboard.container.classList.add("active");  
                 
                 // hide the xp bar
                 timer = setTimeout(() => {
                     container.classList.remove("active");
+                    leaderboard.container.classList.remove("active");   
                 }, data.xpm_config.Timeout);                
 
                 // fill to starting XP / rank
@@ -131,11 +158,12 @@ window.onData = function (data) {
             onRankChange: function (current, next, previous, add, max, rankUp) {
 
                 // Fire rank change to update client UI
-                PostData("xpm_rankchange", rankUp, current, previous)
+                TriggerRankChange(rankUp, current, previous)
 
                 // Remove old ranks
                 rankA.classList.remove(`xp-rank-${previous}`);
                 rankB.classList.remove(`xp-rank-${current}`);
+                rankB.classList.remove(`xpm-rank-${previous + 1}`);              
         
                 // add new ranks
                 rankA.classList.add(`xp-rank-${current}`);
@@ -152,7 +180,6 @@ window.onData = function (data) {
                     rankA.classList.add("spin");
                     rankA.classList.add("highlight");
                     rankB.classList.add("spin");
-                    rankB.classList.add("highlight");
 			
                     rankA.firstElementChild.textContent = current;
                     rankB.firstElementChild.textContent = next;		
@@ -162,14 +189,15 @@ window.onData = function (data) {
                         rankA.classList.remove("highlight");
                         rankB.classList.remove("spin");
                         rankB.classList.remove("highlight");
-                    }, 500);			
-                }, 500);			
+                    }, 250);			
+                }, 250);				
             },
 	
             onEnd: function (add) {
                 // hide the xp bar
                 timer = setTimeout(() => {
                     container.classList.remove("active");
+                    leaderboard.container.classList.remove("active");   
                 }, data.xpm_config.Timeout);
 
                 xpBar.classList.remove("xpm-remove");
@@ -177,31 +205,38 @@ window.onData = function (data) {
         });
     }
 
-
     // Set XP
     if (data.xpm_set && initialised) {
-        instance.setXP(data.xp);
+        rankbar.setXP(data.xp);
     }
 
     // Add XP
     if (data.xpm_add && initialised) {
-        instance.addXP(data.xp);
+        rankbar.addXP(data.xp);
     }
 
     // Remove XP
     if (data.xpm_remove && initialised) {
-        instance.removeXP(data.xp);
+        rankbar.removeXP(data.xp);
     }    
     
     // Show XP bar
     if (data.xpm_display && initialised) {
-        container.classList.add("active");
 
-        this.clearTimeout(this.xpTimer);
-
-        this.xpTimer = this.setTimeout(() => {
+        if ( container.classList.contains("active") ) {
             container.classList.remove("active");
-        }, 5000);
+            leaderboard.container.classList.remove("active");
+        } else {
+            container.classList.add("active");
+            leaderboard.container.classList.add("active");  
+
+            this.clearTimeout(this.xpTimer);
+
+            this.xpTimer = this.setTimeout(() => {
+                container.classList.remove("active");
+                leaderboard.container.classList.remove("active");   
+            }, 5000);
+        }
     }    
 };
 
