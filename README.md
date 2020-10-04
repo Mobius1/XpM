@@ -156,6 +156,21 @@ AddEventHandler("XpM:rankDown", function(newRank --[[ integer ]], previousRank -
 end)
 ```
 
+## Client Triggers
+```lua
+-- SET INTITIAL XP
+TriggerClientEvent('XpM:SetInitial', xp)
+
+-- ADD XP
+TriggerClientEvent('XpM:Add', xp)
+
+-- REMOVE XP
+TriggerClientEvent('XpM:Remove', xp)
+
+-- SET RANK
+TriggerClientEvent('XpM:SetRank', rank)
+```
+
 ## Server Triggers
 ```lua
 -- SET INTITIAL XP
@@ -206,6 +221,20 @@ Example of unlocking the minigun at rank 10:
 AddEventHandler("XpM:rankUp", function(newRank, previousRank)
     if newRank == 10 then
         GiveWeaponToPed(PlayerPedId(), GetHashKey("WEAPON_MINIGUN"), 100, false, false)
+    end
+end)
+```
+
+If player ranks down then you can remove it:
+```lua
+AddEventHandler("XpM:rankUp", function(newRank, previousRank)
+    if newRank < 10 then
+        local player = PlayerPedId()
+        local weapon = GetHashKey("WEAPON_MINIGUN")
+        
+        if HasPedGotWeapon(player, weapon, false) then
+            RemoveWeaponFromPed(player, weapon)
+        end
     end
 end)
 ```
