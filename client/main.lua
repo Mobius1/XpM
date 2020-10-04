@@ -1,9 +1,8 @@
-
-local CurrentXP = 0
-local CurrentRank = 0
-local Leaderboard = nil
-local Players = {}
-local UIActive = false
+CurrentXP = 0
+CurrentRank = 0
+Leaderboard = nil
+Players = {}
+UIActive = false
 
 TriggerServerEvent("XpM:ready")
 
@@ -263,6 +262,33 @@ function XPM_GetMaxRank()
     return #Config.Ranks
 end
 
+------------
+-- XPM_ShowUI.
+--
+-- @global
+-- @return	void
+function XPM_ShowUI()
+    UIActive = true
+
+    TriggerServerEvent("XpM:getPlayerData")
+    
+    SendNUIMessage({
+        xpm_show = true
+    })    
+end
+
+------------
+-- XPM_HideUI.
+--
+-- @global
+-- @return	void
+function XPM_HideUI()
+    UIActive = false
+        
+    SendNUIMessage({
+        xpm_hide = true
+    })      
+end
 
 ------------------------------------------------------------
 --                        CONTROLS                        --

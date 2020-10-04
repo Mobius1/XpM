@@ -6,7 +6,7 @@ description 'XP Ranking System (non-ESX version)'
 
 author 'Karl Saunders'
 
-version '1.3.0'
+version '1.3.1'
 
 server_scripts {
     '@mysql-async/lib/MySQL.lua',
@@ -48,3 +48,6 @@ export 'XPM_GetXPToNextRank'
 export 'XPM_GetXPToRank'
 export 'XPM_GetMaxXP'
 export 'XPM_GetMaxRank'
+
+export 'XPM_ShowUI'
+export 'XPM_HideUI'
