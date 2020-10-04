@@ -7,6 +7,7 @@ const barA = container.querySelector(".xpm-indicator--bar");
 const bar = container.querySelector(".xpm-progress--bar");
 const counter = container.querySelector(".xpm-data");
 let displayTimer = false;
+let interval = 5000;
 let initialised = false;
 
 // Create XP bar segments
@@ -73,7 +74,7 @@ function UIOpen() {
             headers: { 'Content-Type': 'application/json; charset=UTF-8' },
             body: JSON.stringify({})
         });        
-    }, 5000);
+    }, interval);
 }
 
 function UIClose() {
@@ -89,6 +90,8 @@ window.onData = function (data) {
     
     if (data.xpm_init && !initialised) {
 
+        interval = data.xpm_config.Timeout
+
         if ( data.currentID !== false ) {
             currentID = data.currentID
         }
@@ -101,19 +104,6 @@ window.onData = function (data) {
             leaderboard.render();
 
             leaderboard.addPlayers(data.players);
-            
-            // Fake players for testing
-            leaderboard.addPlayers([{
-                id: 3,
-                name: "Fusiixns",
-                rank:92,
-                ping: 15
-            }, {
-                id: 11,
-                name: "Lyles",
-                rank: 89,
-                ping: 12
-            }]); 
         }
 
         const ranks = {};
@@ -143,7 +133,7 @@ window.onData = function (data) {
                 // hide the xp bar
                 displayTimer = setTimeout(() => {
                     UIClose();
-                }, data.xpm_config.Timeout);                
+                }, interval);                
 
                 // fill to starting XP / rank
                 fillSegments(progress, "lastElementChild");
@@ -174,6 +164,8 @@ window.onData = function (data) {
 
             // Update XP progress
             onChange: function (progress, xp, max, add) {
+                container.classList.add("active");
+                
                 // update progress bar
                 fillSegments(progress, "lastElementChild");
 		
@@ -230,7 +222,7 @@ window.onData = function (data) {
                     if ( leaderboard ) {
                         leaderboard.container.classList.remove("active");
                     }
-                }, data.xpm_config.Timeout);
+                }, interval);
 
                 xpBar.classList.remove("xpm-remove");
             }

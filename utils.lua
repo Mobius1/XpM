@@ -49,3 +49,15 @@ function CheckRanks()
 
     return InValid
 end
+
+function SortLeaderboard(players)
+    if Config.Leaderboard.Order == "rank" then
+        table.sort(players, function(a,b)
+            return a.rank > b.rank
+        end)
+    elseif Config.Leaderboard.Order == "name" then
+        table.sort(players, function(a,b)
+            return a.name < b.name
+        end)                
+    end    
+end

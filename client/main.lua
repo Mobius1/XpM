@@ -3,7 +3,7 @@ local CurrentXP = 0
 local CurrentRank = 0
 local Leaderboard = nil
 local Players = {}
-local UIActive = true
+local UIActive = false
 
 TriggerServerEvent("XpM:ready")
 
@@ -22,6 +22,8 @@ AddEventHandler("XpM:init", function(_xp, _rank, players)
         }
 
         if Config.Leaderboard.Enabled and players then
+            SortLeaderboard(players)
+
             data.players = players
             data.showPing = Config.Leaderboard.ShowPing
         
@@ -32,7 +34,7 @@ AddEventHandler("XpM:init", function(_xp, _rank, players)
             end
 
             for k,v in pairs(players) do
-                Players[v.id] = v
+                Players[tonumber(v.id)] = v
             end
         end
 
@@ -44,6 +46,7 @@ AddEventHandler("XpM:init", function(_xp, _rank, players)
 
         CurrentRank = _rank
 
+        -- Native stats
         StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
     else
         print(trans('err_lvls_check', #Ranks, 'Config.Ranks'))
@@ -64,16 +67,17 @@ AddEventHandler("XpM:update", function(_xp, _rank)
 
     CurrentXP = newXP
     CurrentRank = newRank
+
+    StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
 end)
 
+-- Update leaderboard
 if Config.Leaderboard.Enabled then
     RegisterNetEvent("XpM:setPlayerData")
     AddEventHandler("XpM:setPlayerData", function(players)
         for k, v in pairs(players) do
-            Players[v.id] = v
-        end
-
-        print("update")
+            Players[tonumber(v.id)] = v
+        end    
 
         -- Update leaderboard
         SendNUIMessage({
@@ -267,8 +271,10 @@ end
 Citizen.CreateThread(function()
     while true do
         if IsControlJustReleased(0, 20) then
+            -- Toggle UI visibility
             UIActive = not UIActive
 
+            -- If UI is opened, update it
             if UIActive then
                 TriggerServerEvent("XpM:getPlayerData")
             end
@@ -321,6 +327,7 @@ RegisterNUICallback('xpm_rankchange', function(data)
     end
 end)
 
+-- UI HIDE CALLBACK
 RegisterNUICallback('xpm_uichange', function(data)
     UIActive = false
 end)
@@ -359,72 +366,3 @@ exports('XPM_GetMaxXP', XPM_GetMaxXP)
 
 -- GET MAX RANK
 exports('XPM_GetMaxRank', XPM_GetMaxRank)
-
-
-------------------------------------------------------------
---                        COMMANDS                        --
-------------------------------------------------------------
-
-TriggerEvent('chat:addSuggestion', '/XPM', 'Display your XP stats') 
-
-RegisterCommand('XPM', function(source, args)
-    Citizen.CreateThread(function()
-        local xpToNext = XPM_GetXPToNextRank()
-
-        -- SHOW THE XP BAR
-        SendNUIMessage({ xpm_display = true })        
-
-        TriggerEvent('chat:addMessage', {
-            color = { 255, 0, 0},
-            multiline = true,
-            args = {"SYSTEM", trans('cmd_current_xp', CurrentXP)}
-        })
-        TriggerEvent('chat:addMessage', {
-            color = { 255, 0, 0},
-            multiline = true,
-            args = {"SYSTEM", trans('cmd_current_lvl', CurrentRank)}
-        })
-        TriggerEvent('chat:addMessage', {
-            color = { 255, 0, 0},
-            multiline = true,
-            args = {"SYSTEM", trans('cmd_next_lvl', xpToNext, CurrentRank + 1)}
-        })                
-    end)
-end)
-
--- !!!!!! THESE ARE FOR TESTING PURPOSES AND WILL NOT SAVE THE CHANGES IN THE DB !!!!!! --
-RegisterCommand('XPM_SetInitial', function(source, args)
-    if IsInt(args[1]) then
-        CurrentXP = LimitXP(tonumber(args[1]))
-        SendNUIMessage({
-            xpm_set = true,
-            xp = CurrentXP
-        })   
-    else
-        print("XpM: Invalid XP") 
-    end       
-end)
-
-RegisterCommand('XPM_Add', function(source, args)
-    if IsInt(args[1]) then
-        CurrentXP = LimitXP(CurrentXP + tonumber(args[1]))
-        SendNUIMessage({
-            xpm_set = true,
-            xp = CurrentXP
-        }) 
-    else
-        print("XpM: Invalid XP") 
-    end  
-end)
-
-RegisterCommand('XPM_Remove', function(source, args)
-    if IsInt(args[1]) then    
-        CurrentXP = LimitXP(CurrentXP - tonumber(args[1]))
-        SendNUIMessage({
-            xpm_set = true,
-            xp = CurrentXP
-        }) 
-    else
-        print("XpM: Invalid XP") 
-    end     
-end)
