@@ -227,7 +227,7 @@ end)
 
 If player ranks down then you can remove it:
 ```lua
-AddEventHandler("XpM:rankUp", function(newRank, previousRank)
+AddEventHandler("XpM:rankDown", function(newRank, previousRank)
     if newRank < 10 then
         local player = PlayerPedId()
         local weapon = GetHashKey("WEAPON_MINIGUN")
