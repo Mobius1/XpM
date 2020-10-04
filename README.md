@@ -159,16 +159,16 @@ end)
 ## Client Triggers
 ```lua
 -- SET INTITIAL XP
-TriggerClientEvent('XpM:SetInitial', xp)
+TriggerEvent('XpM:SetInitial', xp)
 
 -- ADD XP
-TriggerClientEvent('XpM:Add', xp)
+TriggerEvent('XpM:Add', xp)
 
 -- REMOVE XP
-TriggerClientEvent('XpM:Remove', xp)
+TriggerEvent('XpM:Remove', xp)
 
 -- SET RANK
-TriggerClientEvent('XpM:SetRank', rank)
+TriggerEvent('XpM:SetRank', rank)
 ```
 
 ## Server Triggers
