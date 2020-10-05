@@ -12,23 +12,29 @@ This is a framework agnostic version of my [esx_xp](https://github.com/Mobius1/e
 * Integrated leaderboard
 
 ## TOC
-* [Features](#features)
 * [Demos](#demos)
 * [Requirements](#requirements)
 * [Download & Installation](#download---installation)
 * [Configuration](#configuration)
 * [Functions](#functions)
-* [Setters](#setters)
-* [Getters](#getters)
+    + [Setters](#setters)
+    + [Getters](#getters)
 * [Client Event Listeners](#client-event-listeners)
+* [Client Triggers](#client-triggers)
 * [Server Triggers](#server-triggers)
 * [UI](#ui)
 * [Commands](#commands)
 * [Demo Commands](#demo-commands)
 * [FAQ](#faq)
+    - [Does this use  VenomXNL's XNLRankBar?](#does-this-use--venomxnl-s--xnlrankbar--)* 
+    - [How do I change the look of the UI?](#how-do-i-change-the-look-of-the-ui-)
+    - [How do I lock a weapon / vehicle / unlockable to a rank?](#how-do-i-lock-a-weapon---vehicle---unlockable-to-a-rank-)
 * [Contributing](#contributing)
 * [Legal](#legal)
-* [License](#license)
+    + [License](#license)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 
 ## Demos
 You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO).
@@ -242,6 +248,10 @@ Remove all fake players
 ```
 
 ## FAQ
+
+#### Does this use  VenomXNL's `XNLRankBar`?
+
+No. I thought about using it, but I created a HTML5 version of the GTA:O rankbar so I could have greater control / customisation. You can see the base system I created [here](https://codepen.io/Mobius1/pen/yLeMwzO).
 
 #### How do I change the look of the UI?
 
