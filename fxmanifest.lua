@@ -6,7 +6,7 @@ description 'XP Ranking System (non-ESX version)'
 
 author 'Karl Saunders'
 
-version '1.3.2'
+version '1.4.0'
 
 server_scripts {
     '@mysql-async/lib/MySQL.lua',
@@ -26,15 +26,15 @@ client_scripts {
     'demo.lua' -- remove if not required
 }
 
-ui_page 'html/ui.html'
+ui_page 'ui/ui.html'
 
 files {
-    'html/ui.html',
-    'html/fonts/ChaletComprimeCologneSixty.ttf',
-    'html/css/app.css',
-    'html/js/class.xpm.js',
-    'html/js/class.leaderboard.js',
-    'html/js/app.js'
+    'ui/ui.html',
+    'ui/fonts/ChaletComprimeCologneSixty.ttf',
+    'ui/css/app.css',
+    'ui/js/class.xpm.js',
+    'ui/js/class.leaderboard.js',
+    'ui/js/app.js'
 }
 
 export 'XPM_SetInitial'

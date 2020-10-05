@@ -1,6 +1,6 @@
 Locales = {}
 
-function trans(str, ...)
+function _(str, ...)
     if Locales[Config.Locale] ~= nil then
 
         if Locales[Config.Locale][str] ~= nil then

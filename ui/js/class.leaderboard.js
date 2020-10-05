@@ -86,36 +86,30 @@ class Leaderboard {
 		
         this.players[player.id] = player;
 		
-        this.header.textContent = `Players: ${Object.keys(this.players).length}`;
+        this.header.textContent = `Players: ${this.getPlayerCount()}`;
     }
 
     updatePlayers(players) {
-        for ( const id in players ) {
-            const player = players[id];
-            if ( !(player.id in this.players) ) {
-                this.addPlayer(player);
-            } else {
-                const row = this.players[player.id].row;
-                row.querySelector(".xpm-leaderboard--playername").textContent = player.name;
-                row.querySelector(".xpm-leaderboard--playerranknum").textContent = player.rank;
 
-                if ( this.config.showPing ) {
-                    row.querySelector(".xpm-leaderboard--playerping").textContent = `${player.ping}ms`;
-                }
+        this.list.innerHTML = "";
+        this.players = {};
 
-                this.players[player.id].name = player.name;
-                this.players[player.id].rank = player.rank;
-                this.players[player.id].ping = player.ping;
-            }
-            
+        for ( const player of players ) {
+            this.addPlayer(player);
         }
 
-        this.header.textContent = `Players: ${Object.keys(this.players).length}`;
+        this.header.textContent = `Players: ${this.getPlayerCount()}`;
+    }
+
+    getPlayerCount() {
+        return Object.keys(this.players).length;
     }
 	
     addPlayers(players) {
         for ( const player of players ) {
-            this.addPlayer(player);
+            if ( !(player.id in this.players) ) {
+                this.addPlayer(player);
+            }
         }
     }
 

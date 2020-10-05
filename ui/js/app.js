@@ -6,6 +6,7 @@ const xpBar = container.querySelector(".xpm-progress");
 const barA = container.querySelector(".xpm-indicator--bar");
 const bar = container.querySelector(".xpm-progress--bar");
 const counter = container.querySelector(".xpm-data");
+let globalConfig = false;
 let displayTimer = false;
 let interval = 5000;
 let initialised = false;
@@ -73,12 +74,15 @@ function UIOpen() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json; charset=UTF-8' },
             body: JSON.stringify({})
-        });        
-    }, interval);
+        }); 
+        
+        displayTimer = false;
+    }, globalConfig.Timeout);
 }
 
 function UIClose() {
     clearTimeout(displayTimer);
+    displayTimer = false;
 
     container.classList.remove("active");
     if ( leaderboard ) {
@@ -90,7 +94,7 @@ window.onData = function (data) {
     
     if (data.xpm_init && !initialised) {
 
-        interval = data.xpm_config.Timeout
+        globalConfig = data.xpm_config
 
         if ( data.currentID !== false ) {
             currentID = data.currentID
@@ -103,7 +107,7 @@ window.onData = function (data) {
 
             leaderboard.render();
 
-            leaderboard.addPlayers(data.players);
+            leaderboard.addPlayers(data.players); 
         }
 
         const ranks = {};
@@ -133,7 +137,7 @@ window.onData = function (data) {
                 // hide the xp bar
                 displayTimer = setTimeout(() => {
                     UIClose();
-                }, interval);                
+                }, globalConfig.Timeout);                
 
                 // fill to starting XP / rank
                 fillSegments(progress, "lastElementChild");
@@ -155,6 +159,7 @@ window.onData = function (data) {
 	
             onStart: function(add) {
                 clearTimeout(displayTimer);
+
                 // show the xp bar
                 container.classList.add("active");
 
@@ -222,57 +227,59 @@ window.onData = function (data) {
                     if ( leaderboard ) {
                         leaderboard.container.classList.remove("active");
                     }
-                }, interval);
+                }, globalConfig.Timeout);
 
                 xpBar.classList.remove("xpm-remove");
             }
         });
     }
 
-    // Set XP
-    if (data.xpm_set && initialised) {
-        rankbar.setXP(data.xp);
-    }
-
-    // Add XP
-    if (data.xpm_add && initialised) {
-        rankbar.addXP(data.xp);
-    }
-
-    // Remove XP
-    if (data.xpm_remove && initialised) {
-        rankbar.removeXP(data.xp);
-    }    
-    
-    // Show XP bar
-    if (data.xpm_display && initialised) {
-        if ( container.classList.contains("active") ) {
-            UIClose()
-        } else {
-            UIOpen()
+    if ( initialised ) {
+        // Set XP
+        if (data.xpm_set) {
+            rankbar.setXP(data.xp);
         }
-    }   
+
+        // Add XP
+        if (data.xpm_add) {
+            rankbar.addXP(data.xp);
+        }
+
+        // Remove XP
+        if (data.xpm_remove) {
+            rankbar.removeXP(data.xp);
+        }    
     
-    if (data.xpm_show && initialised) {
-        UIOpen()
-    } 
+        // Show XP bar
+        if (data.xpm_display) {
+            if ( container.classList.contains("active") ) {
+                UIClose()
+            } else {
+                UIOpen()
+            }
+        }   
 
-    if (data.xpm_hide && initialised) {
-        UIClose()
-    }
+        if (data.xpm_show) {
+            UIOpen()
+        } 
 
-    if (data.xpm_removeplayer && initialised) {
-        leaderboard.removePlayer(data.player);
-    }   
+        if (data.xpm_hide) {
+            UIClose()
+        }
 
-    if (data.xpm_removeplayers && initialised) {
-        leaderboard.removePlayers(data.players);
-    }     
+        if (data.xpm_removeplayer) {
+            leaderboard.removePlayer(data.player);
+        }   
+
+        if (data.xpm_removeplayers) {
+            leaderboard.removePlayers(data.players);
+        }   
     
-    // Update Leaderboard
-    if (data.xpm_updateleaderboard && initialised) {
-        leaderboard.updatePlayers(data.xpm_players);
-    }     
+        // Update Leaderboard
+        if (data.xpm_updateleaderboard) {
+            leaderboard.updatePlayers(data.xpm_players);
+        } 
+    }    
 };
 
 window.onload = function (e) {

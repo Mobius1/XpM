@@ -2,7 +2,7 @@ CurrentXP = 0
 CurrentRank = 0
 Leaderboard = nil
 Players = {}
-UIActive = false
+UIActive = true
 
 TriggerServerEvent("XpM:ready")
 
@@ -13,42 +13,39 @@ AddEventHandler("XpM:init", function(_xp, _rank, players)
 
     -- All ranks are valid
     if #Ranks == 0 then
+        CurrentXP = tonumber(_xp)
+        CurrentRank = tonumber(_rank)
 
         local data = {
             xpm_init = true,
             xpm_config = Config,
             currentID = false,
+            xp = CurrentXP
         }
-
+    
         if Config.Leaderboard.Enabled and players then
-            SortLeaderboard(players)
-
             data.players = players
             data.showPing = Config.Leaderboard.ShowPing
-        
+            
             for k, v in pairs(players) do
                 if GetPlayerServerId(PlayerId()) == tonumber(v.id) then
                     data.currentID = tonumber(v.id)
                 end
             end
 
-            for k,v in pairs(players) do
-                Players[tonumber(v.id)] = v
-            end
+            -- Sort the leaderboard
+            SortLeaderboard(players)            
+    
+            Players = players                       
         end
-
-        CurrentXP = tonumber(_xp)
-
-        data.xp = CurrentXP
-
+    
+        -- Update UI
         SendNUIMessage(data)
-
-        CurrentRank = _rank
-
+    
         -- Native stats
         StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
     else
-        print(trans('err_lvls_check', #Ranks, 'Config.Ranks'))
+        print(_('err_lvls_check', #Ranks, 'Config.Ranks'))
     end
 end)
 
@@ -66,17 +63,36 @@ AddEventHandler("XpM:update", function(_xp, _rank)
 
     CurrentXP = newXP
     CurrentRank = newRank
-
-    StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
 end)
 
--- Update leaderboard
 if Config.Leaderboard.Enabled then
     RegisterNetEvent("XpM:setPlayerData")
     AddEventHandler("XpM:setPlayerData", function(players)
+
+        -- Remove disconnected players
+        for i=#Players,1,-1 do
+            local active = PlayerIsActive(players, Players[i].id)
+
+            if not Players[i].fake then
+                if not active then
+                    table.remove(Players, i)
+                end
+            end
+        end
+
+        -- Add new players
         for k, v in pairs(players) do
-            Players[tonumber(v.id)] = v
-        end    
+            local active = PlayerIsActive(Players, v.id)
+
+            if not active then
+                table.insert(Players, v)
+            else
+                Players[active] = v
+            end
+        end
+
+        -- Sort the leaderboard
+        SortLeaderboard(Players)
 
         -- Update leaderboard
         SendNUIMessage({
@@ -126,7 +142,7 @@ function XPM_SetInitial(XPInit)
     local GoalXP = tonumber(XPInit)
     -- Check for valid XP
     if not GoalXP or (GoalXP < 0 or GoalXP > XPM_GetMaxXP()) then
-        print(trans('err_xp_update', XPInit, "XPM_SetInitial"))
+        print(_('err_xp_update', XPInit, "XPM_SetInitial"))
         return
     end    
     UpdateXP(tonumber(GoalXP), true)
@@ -142,7 +158,7 @@ function XPM_SetRank(Rank)
     local GoalRank = tonumber(Rank)
 
     if not GoalRank then
-        print(trans('err_lvl_update', Rank, "XPM_SetRank"))
+        print(_('err_lvl_update', Rank, "XPM_SetRank"))
         return
     end
 
@@ -160,7 +176,7 @@ end
 function XPM_Add(XPAdd)
     -- Check for valid XP
     if not tonumber(XPAdd) then
-        print(trans('err_xp_update', XPAdd, "XPM_Add"))
+        print(_('err_xp_update', XPAdd, "XPM_Add"))
         return
     end       
     UpdateXP(tonumber(XPAdd))
@@ -175,7 +191,7 @@ end
 function XPM_Remove(XPRemove)
     -- Check for valid XP
     if not tonumber(XPRemove) then
-        print(trans('err_xp_update', XPRemove, "XPM_Remove"))
+        print(_('err_xp_update', XPRemove, "XPM_Remove"))
         return
     end       
     UpdateXP(-(tonumber(XPRemove)))
@@ -226,7 +242,7 @@ function XPM_GetXPToRank(Rank)
     local GoalRank = tonumber(Rank)
     -- Check for valid rank
     if not GoalRank or (GoalRank < 1 or GoalRank > #Config.Ranks) then
-        print(trans('err_lvl_update', Rank, "XPM_GetXPToRank"))
+        print(_('err_lvl_update', Rank, "XPM_GetXPToRank"))
         return
     end
 
@@ -267,10 +283,12 @@ end
 --
 -- @global
 -- @return	void
-function XPM_ShowUI()
+function XPM_ShowUI(update)
     UIActive = true
 
-    TriggerServerEvent("XpM:getPlayerData")
+    if update ~= nil then
+        TriggerServerEvent("XpM:getPlayerData")
+    end
     
     SendNUIMessage({
         xpm_show = true
@@ -290,6 +308,15 @@ function XPM_HideUI()
     })      
 end
 
+function XPM_SortLeaderboard(type)
+    if type == nil then
+        type = "rank"
+    end
+    SendNUIMessage({
+        xpm_sortleaderboard = type
+    })      
+end
+
 ------------------------------------------------------------
 --                        CONTROLS                        --
 ------------------------------------------------------------
@@ -297,10 +324,8 @@ end
 Citizen.CreateThread(function()
     while true do
         if IsControlJustReleased(0, 20) then
-            -- Toggle UI visibility
             UIActive = not UIActive
 
-            -- If UI is opened, update it
             if UIActive then
                 TriggerServerEvent("XpM:getPlayerData")
             end
@@ -353,7 +378,6 @@ RegisterNUICallback('xpm_rankchange', function(data)
     end
 end)
 
--- UI HIDE CALLBACK
 RegisterNUICallback('xpm_uichange', function(data)
     UIActive = false
 end)
@@ -392,3 +416,34 @@ exports('XPM_GetMaxXP', XPM_GetMaxXP)
 
 -- GET MAX RANK
 exports('XPM_GetMaxRank', XPM_GetMaxRank)
+
+
+------------------------------------------------------------
+--                        COMMANDS                        --
+------------------------------------------------------------
+TriggerEvent('chat:addSuggestion', '/XPM', 'Display your XP stats')
+
+RegisterCommand('XPM', function(source, args)
+    Citizen.CreateThread(function()
+        local xpToNext = XPM_GetXPToNextRank()
+
+        -- SHOW THE XP BAR
+        SendNUIMessage({ xpm_display = true })        
+
+        TriggerEvent('chat:addMessage', {
+            color = { 255, 0, 0},
+            multiline = true,
+            args = {"SYSTEM", _('cmd_current_xp', CurrentXP)}
+        })
+        TriggerEvent('chat:addMessage', {
+            color = { 255, 0, 0},
+            multiline = true,
+            args = {"SYSTEM", _('cmd_current_lvl', CurrentRank)}
+        })
+        TriggerEvent('chat:addMessage', {
+            color = { 255, 0, 0},
+            multiline = true,
+            args = {"SYSTEM", _('cmd_next_lvl', xpToNext, CurrentRank + 1)}
+        })                
+    end)
+end)
