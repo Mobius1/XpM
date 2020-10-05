@@ -33,8 +33,6 @@ This is a framework agnostic version of my [esx_xp](https://github.com/Mobius1/e
 * [Legal](#legal)
     + [License](#license)
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
 
 ## Demos
 You can find an interactive demo [here](https://codepen.io/Mobius1/full/yLeMwzO).
