@@ -323,7 +323,7 @@ end
 
 Citizen.CreateThread(function()
     while true do
-        if IsControlJustReleased(0, 20) then
+        if IsControlJustReleased(0, Config.UIKey) then
             UIActive = not UIActive
 
             if UIActive then
