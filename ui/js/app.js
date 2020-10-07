@@ -50,7 +50,9 @@ function fillSegments(pr, child) {
 }
 
 function TriggerRankChange(rankUp, current, previous) {
-    leaderboard.updateRank(currentID, current)
+    if ( leaderboard && currentID ) {
+        leaderboard.updateRank(currentID, current);
+    }
 
     fetch(`https://${GetParentResourceName()}/xpm_rankchange`, {
         method: 'POST',
