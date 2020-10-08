@@ -7,18 +7,25 @@ AddEventHandler("XpM:ready", function()
     local identifier = GetSteamIdentifier(_source)
 
     if identifier then
-        MySQL.Async.fetchAll('SELECT rp_xp, rp_rank FROM users WHERE identifier = @identifier', {
+        MySQL.Async.fetchAll('SELECT * FROM users WHERE identifier = @identifier', {
             ['@identifier'] = identifier
         }, function(result)
             if #result > 0 then
-                CurrentXP = tonumber(result[1]["rp_xp"])
-                CurrentRank = tonumber(result[1]["rp_rank"])       
-                
-                if Config.Leaderboard.Enabled then
-                    FetchActivePlayers(_source, CurrentXP, CurrentRank)
+
+                if result[1]["rp_xp"] == nil or result[1]["rp_rank"] == nil then
+                    TriggerClientEvent("XpM:print", _source, _("err_db_columns"))
                 else
-                    TriggerClientEvent("XpM:init", _source, CurrentXP, CurrentRank, false)
+                    CurrentXP = tonumber(result[1]["rp_xp"])
+                    CurrentRank = tonumber(result[1]["rp_rank"])       
+                    
+                    if Config.Leaderboard.Enabled then
+                        FetchActivePlayers(_source, CurrentXP, CurrentRank)
+                    else
+                        TriggerClientEvent("XpM:init", _source, CurrentXP, CurrentRank, false)
+                    end
                 end
+            else
+                TriggerClientEvent("XpM:print", _source, _("err_db_user"))
             end
         end)
     end
@@ -27,9 +34,7 @@ end)
 function FetchActivePlayers(_source, CurrentXP, CurrentRank)
     MySQL.Async.fetchAll('SELECT * FROM users', {}, function(players)
         if #players > 0 then
-            local Players = GetOnlinePlayers(players)          
-            
-            TriggerClientEvent("XpM:init", _source, CurrentXP, CurrentRank, Players)
+            TriggerClientEvent("XpM:init", _source, CurrentXP, CurrentRank, GetOnlinePlayers(_source, players))
         end
     end)
 end
@@ -91,10 +96,8 @@ RegisterNetEvent("XpM:getPlayerData")
 AddEventHandler("XpM:getPlayerData", function()
     local _source = source
     MySQL.Async.fetchAll('SELECT * FROM users', {}, function(players)
-        if #players > 0 then
-            local Players = GetOnlinePlayers(players)             
-                
-            TriggerClientEvent("XpM:setPlayerData", _source, Players)
+        if #players > 0 then     
+            TriggerClientEvent("XpM:setPlayerData", _source, GetOnlinePlayers(_source, players))
         end
     end) 
 end)

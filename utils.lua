@@ -42,7 +42,7 @@ function CheckRanks()
         local RankXP = Config.Ranks[i]
 
         if not IsInt(RankXP) then
-            table.insert(InValid, trans('err_lvl_check', i,  RankXP))
+            table.insert(InValid, _('err_lvl_check', i,  RankXP))
         end
         
     end
@@ -80,8 +80,8 @@ function PlayerIsActive(tab, val)
     return false
 end
 
-function GetOnlinePlayers(players)
-    local Players = {}
+function GetOnlinePlayers(_source, players)
+    local Active = {}
     for _, playerId in ipairs(GetPlayers()) do
         local name = GetPlayerName(playerId)
     
@@ -92,16 +92,20 @@ function GetOnlinePlayers(players)
                     id = playerId,
                     xp = v.rp_xp,
                     rank = v.rp_rank
-                }     
+                }
+
+                if v.identifier == GetSteamIdentifier(_source) then
+                    Player.current = true
+                end
                             
                 if Config.Leaderboard.ShowPing then
                     Player.ping = GetPlayerPing(playerId)
                 end
     
-                table.insert(Players, Player)
+                table.insert(Active, Player)
                 break
             end
         end
     end
-    return Players 
+    return Active 
 end

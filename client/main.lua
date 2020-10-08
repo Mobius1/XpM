@@ -2,9 +2,20 @@ CurrentXP = 0
 CurrentRank = 0
 Leaderboard = nil
 Players = {}
+Player = nil
 UIActive = true
 
+
+------------------------------------------------------------
+--                         READY                          --
+------------------------------------------------------------
+
 TriggerServerEvent("XpM:ready")
+
+
+------------------------------------------------------------
+--                      MAIN EVENTS                       --
+------------------------------------------------------------
 
 RegisterNetEvent("XpM:init")
 AddEventHandler("XpM:init", function(_xp, _rank, players)
@@ -19,33 +30,30 @@ AddEventHandler("XpM:init", function(_xp, _rank, players)
         local data = {
             xpm_init = true,
             xpm_config = Config,
-            currentID = false,
+            currentID = GetPlayerServerId(PlayerId()),
             xp = CurrentXP
         }
     
         if Config.Leaderboard.Enabled and players then
             data.players = players
             data.showPing = Config.Leaderboard.ShowPing
-            
-            for k, v in pairs(players) do
-                if GetPlayerServerId(PlayerId()) == tonumber(v.id) then
-                    data.currentID = tonumber(v.id)
-                end
-            end
 
-            -- Sort the leaderboard
-            SortLeaderboard(players)            
+            for k, v in pairs(players) do
+                if v.current then
+                    Player = v
+                end
+            end        
     
             Players = players                       
         end
     
         -- Update UI
         SendNUIMessage(data)
-    
+
         -- Native stats
         StatSetInt("MPPLY_GLOBALXP", CurrentXP, 1)
     else
-        print(_('err_lvls_check', #Ranks, 'Config.Ranks'))
+        TriggerEvent("XpM:print", _('err_lvls_check', #Ranks, 'Config.Ranks'))
     end
 end)
 
@@ -89,10 +97,11 @@ if Config.Leaderboard.Enabled then
             else
                 Players[active] = v
             end
-        end
 
-        -- Sort the leaderboard
-        SortLeaderboard(Players)
+            if v.current then
+                Player = v
+            end            
+        end
 
         -- Update leaderboard
         SendNUIMessage({
@@ -102,6 +111,14 @@ if Config.Leaderboard.Enabled then
     end)
 end
 
+-- Error Printing
+RegisterNetEvent("XpM:print")
+AddEventHandler("XpM:print", function(message)
+    local s = string.rep("=", string.len(message))
+    print(s)
+    print(message)
+    print(s)           
+end)
 
 ------------------------------------------------------------
 --                       FUNCTIONS                        --
@@ -142,7 +159,7 @@ function XPM_SetInitial(XPInit)
     local GoalXP = tonumber(XPInit)
     -- Check for valid XP
     if not GoalXP or (GoalXP < 0 or GoalXP > XPM_GetMaxXP()) then
-        print(_('err_xp_update', XPInit, "XPM_SetInitial"))
+        TriggerEvent("XpM:print", _('err_xp_update', XPInit, "XPM_SetInitial"))
         return
     end    
     UpdateXP(tonumber(GoalXP), true)
@@ -158,7 +175,7 @@ function XPM_SetRank(Rank)
     local GoalRank = tonumber(Rank)
 
     if not GoalRank then
-        print(_('err_lvl_update', Rank, "XPM_SetRank"))
+        TriggerEvent("XpM:print", _('err_lvl_update', Rank, "XPM_SetRank"))
         return
     end
 
@@ -176,7 +193,7 @@ end
 function XPM_Add(XPAdd)
     -- Check for valid XP
     if not tonumber(XPAdd) then
-        print(_('err_xp_update', XPAdd, "XPM_Add"))
+        TriggerEvent("XpM:print", _('err_xp_update', XPAdd, "XPM_Add"))
         return
     end       
     UpdateXP(tonumber(XPAdd))
@@ -191,7 +208,7 @@ end
 function XPM_Remove(XPRemove)
     -- Check for valid XP
     if not tonumber(XPRemove) then
-        print(_('err_xp_update', XPRemove, "XPM_Remove"))
+        TriggerEvent("XpM:print", _('err_xp_update', XPRemove, "XPM_Remove"))
         return
     end       
     UpdateXP(-(tonumber(XPRemove)))
@@ -242,7 +259,7 @@ function XPM_GetXPToRank(Rank)
     local GoalRank = tonumber(Rank)
     -- Check for valid rank
     if not GoalRank or (GoalRank < 1 or GoalRank > #Config.Ranks) then
-        print(_('err_lvl_update', Rank, "XPM_GetXPToRank"))
+        TriggerEvent("XpM:print", _('err_lvl_update', Rank, "XPM_GetXPToRank"))
         return
     end
 
@@ -308,13 +325,23 @@ function XPM_HideUI()
     })      
 end
 
-function XPM_SortLeaderboard(type)
-    if type == nil then
-        type = "rank"
+function XPM_TimeoutUI(update)
+    UIActive = true
+
+    if update ~= nil then
+        TriggerServerEvent("XpM:getPlayerData")
     end
+    
     SendNUIMessage({
-        xpm_sortleaderboard = type
-    })      
+        xpm_display = true
+    })    
+end
+
+function XPM_SortLeaderboard(type)
+    SendNUIMessage({
+        xpm_lb_sort = true,
+        xpm_lb_order = type or "rank"
+    })   
 end
 
 ------------------------------------------------------------
@@ -325,23 +352,38 @@ Citizen.CreateThread(function()
     while true do
         if IsControlJustReleased(0, Config.UIKey) then
             UIActive = not UIActive
-
+            
             if UIActive then
                 TriggerServerEvent("XpM:getPlayerData")
+                SendNUIMessage({
+                    xpm_show = true
+                })                 
+            else
+                SendNUIMessage({
+                    xpm_hide = true
+                })                
             end
-
-            SendNUIMessage({
-                xpm_display = true
-            })
-            
+        elseif IsControlJustPressed(0, 174) then
+            if UIActive then
+                SendNUIMessage({
+                    xpm_lb_prev = true
+                })
+            end
+        elseif IsControlJustPressed(0, 175) then
+            if UIActive then
+                SendNUIMessage({
+                    xpm_lb_next = true
+                })
+            end
         end
+
         Citizen.Wait(1)
     end
 end)
 
 
 ------------------------------------------------------------
---                         EVENTS                         --
+--                         MAIN                          --
 ------------------------------------------------------------
 
 RegisterNetEvent("XpM:updateUI")
@@ -382,6 +424,10 @@ RegisterNUICallback('xpm_uichange', function(data)
     UIActive = false
 end)
 
+RegisterNUICallback('xpm_lbchange', function(data)
+    LBActive = false
+end)
+
 
 ------------------------------------------------------------
 --                        EXPORTS                         --
@@ -416,6 +462,18 @@ exports('XPM_GetMaxXP', XPM_GetMaxXP)
 
 -- GET MAX RANK
 exports('XPM_GetMaxRank', XPM_GetMaxRank)
+
+-- SHOW UI
+exports('XPM_ShowUI', XPM_ShowUI)
+
+-- HIDE UI
+exports('XPM_HideUI', XPM_HideUI)
+
+-- TIMEOUT UI
+exports('XPM_TimeoutUI', XPM_TimeoutUI)
+
+-- SORT LEADERBOARD
+exports('XPM_SortLeaderboard', XPM_SortLeaderboard)
 
 
 ------------------------------------------------------------

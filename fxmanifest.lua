@@ -6,7 +6,7 @@ description 'XP Ranking System (non-ESX version)'
 
 author 'Karl Saunders'
 
-version '1.4.1'
+version '1.5.0'
 
 server_scripts {
     '@mysql-async/lib/MySQL.lua',
@@ -33,6 +33,7 @@ files {
     'ui/fonts/ChaletComprimeCologneSixty.ttf',
     'ui/css/app.css',
     'ui/js/class.xpm.js',
+    'ui/js/class.paginator.js',
     'ui/js/class.leaderboard.js',
     'ui/js/app.js'
 }
@@ -51,3 +52,5 @@ export 'XPM_GetMaxRank'
 
 export 'XPM_ShowUI'
 export 'XPM_HideUI'
+export 'XPM_TimeoutUI'
+export 'XPM_SortLeaderboard'

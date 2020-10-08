@@ -63,36 +63,27 @@ RegisterCommand('XPM_AddFakePlayer', function(source, args)
 
     XPM_ShowUI(true)
 
-    exports.FeedM:ShowNotification("~b~XPM: ~g~" .. count .. " ~w~players added")      
+    ShowNotification("~b~XPM: ~g~" .. count .. " ~w~players added")      
 end)
 
 RegisterCommand('XPM_RemoveFakePlayers', function(source, args)
     for i=#Players,1,-1 do
-        if Players[i].fake then
+        if Players[i].fake ~= nil then
             table.remove(Players, i)
         end
     end
 
-    exports.FeedM:ShowNotification("~b~XPM: ~w~Fake players removed")    
+    ShowNotification("~b~XPM: ~w~Fake players removed")    
 
-    XPM_ShowUI(true)  
+    XPM_ShowUI(true)
 end)
 
 RegisterCommand('XPM_SortLeaderboard', function(source, args)
     local order = args[1] or "rank"
 
-    XPM_ShowUI() 
+    XPM_SortLeaderboard(order)
 
-    -- Sort the leaderboard
-    SortLeaderboard(Players, order)
-
-    -- Update leaderboard
-    SendNUIMessage({
-        xpm_updateleaderboard = true,
-        xpm_players = Players
-    })
-
-    exports.FeedM:ShowNotification("~b~XPM: ~w~Leaderboard ordered by ~g~" .. order)    
+    ShowNotification("~b~XPM: ~w~Leaderboard ordered by ~g~" .. order)    
 end)
 
 function AddFakePlayer()
